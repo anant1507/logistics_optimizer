@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="reports">
+    <h2>Reports</h2>
+    
+    <div class="report-cards">
+        <div class="card">
+            <h3>Total Schedules</h3>
+            <p class="big-number">{{ total_schedules }}</p>
+        </div>
+        
+        <div class="card">
+            <h3>Completed Schedules</h3>
+            <p class="big-number">{{ completed_schedules }}</p>
+        </div>
+        
+        <div class="card">
+            <h3>Delayed Schedules</h3>
+            <p class="big-number">{{ delayed_schedules }}</p>
+        </div>
+        
+        <div class="card">
+            <h3>Success Rate</h3>
+            <p class="big-number">
+                {% if total_schedules > 0 %}
+                {{ "%.1f"|format((completed_schedules / total_schedules) * 100) }}%
+                {% else %}
+                0%
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    
+    <h3>Port Utilization</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Port</th>
+                <th>Utilization</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for util in port_utilization %}
+            <tr>
+                <td>{{ util.port }}</td>
+                <td>{{ util.utilization }}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

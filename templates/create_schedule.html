@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="create-schedule">
+    <h2>Create New Schedule</h2>
+    
+    <form method="POST">
+        <div class="form-group">
+            <label for="type">Schedule Type:</label>
+            <select id="type" name="type" required>
+                <option value="vessel-to-port">Vessel to Port</option>
+                <option value="port-to-plant">Port to Plant</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="supplier_id">Supplier:</label>
+            <select id="supplier_id" name="supplier_id" required>
+                {% for supplier in suppliers %}
+                <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="port_id">Port:</label>
+            <select id="port_id" name="port_id" required>
+                {% for port in ports %}
+                <option value="{{ port.id }}">{{ port.name }} (Capacity: {{ port.capacity }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="plant_id">Plant:</label>
+            <select id="plant_id" name="plant_id" required>
+                {% for plant in plants %}
+                <option value="{{ plant.id }}">{{ plant.name }} (Capacity: {{ plant.capacity }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="vessel_id">Vessel:</label>
+            <select id="vessel_id" name="vessel_id" required>
+                {% for vessel in vessels %}
+                <option value="{{ vessel.id }}">{{ vessel.name }} (Capacity: {{ vessel.capacity }}, Status: {{ vessel.status }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="rake_id">Rake:</label>
+            <select id="rake_id" name="rake_id" required>
+                {% for rake in rakes %}
+                <option value="{{ rake.id }}">{{ rake.name }} (Capacity: {{ rake.capacity }}, Status: {{ rake.status }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" name="quantity" min="1" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="scheduled_date">Scheduled Date:</label>
+            <input type="date" id="scheduled_date" name="scheduled_date" required>
+        </div>
+        
+        <button type="submit">Create Schedule</button>
+    </form>
+</div>
+{% endblock %}

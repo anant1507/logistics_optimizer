@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Enabled Logistics Optimizer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>AI-Enabled Logistics Optimizer</h1>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                    <li><a href="{{ url_for('schedules_page') }}">Schedules</a></li>
+                    <li><a href="{{ url_for('stock_levels_page') }}">Stock Levels</a></li>
+                    <li><a href="{{ url_for('reports_page') }}">Reports</a></li>
+                    {% if session.role in ['admin', 'owner'] %}
+                    <li><a href="{{ url_for('manage_data_page') }}">Manage Data</a></li>
+                    {% endif %}
+                    <li class="user-info">
+                        <span>{{ session.get('name', 'User') }} ({{ session.role }})</span>
+                        <a href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 AI-Enabled Logistics Optimizer - Logged in as: {{ session.get('name', 'User') }} ({{ session.role }})</p>
+        </div>
+    </footer>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

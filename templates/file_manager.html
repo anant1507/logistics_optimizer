@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="file-manager">
+    <h2>File Manager</h2>
+    
+    {% if can_upload %}
+    <div class="upload-section">
+        <h3>Upload File</h3>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="file">Select file (CSV, Excel):</label>
+                <input type="file" id="file" name="file" accept=".csv,.xlsx,.xls" required>
+            </div>
+            <button type="submit">Upload File</button>
+        </form>
+        <div id="uploadMessage" class="message"></div>
+    </div>
+    {% endif %}
+
+    <div class="files-list">
+        <h3>Uploaded Files</h3>
+        {% if files %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Filename</th>
+                    <th>Type</th>
+                    <th>Uploaded By</th>
+                    <th>Uploaded At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for file in files %}
+                <tr>
+                    <td>{{ file.filename }}</td>
+                    <td>{{ file.file_type|upper }}</td>
+                    <td>{{ file.uploaded_by }}</td>
+                    <td>{{ file.uploaded_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        <a href="{{ url_for('export_data', data_type='schedules') }}" class="btn">Download</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No files uploaded yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData();
+    const fileInput = document.getElementById('file');
+    formData.append('file', fileInput.files[0]);
+    
+    const submitBtn = this.querySelector('button');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Uploading...';
+    submitBtn.disabled = true;
+    
+    fetch('/upload_file', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(result => {
+        const messageDiv = document.getElementById('uploadMessage');
+        if (result.success) {
+            messageDiv.innerHTML = '<div class="success">' + result.message + '</div>';
+            fileInput.value = '';
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            messageDiv.innerHTML = '<div class="error">' + result.message + '</div>';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('uploadMessage').innerHTML = '<div class="error">Upload failed</div>';
+    })
+    .finally(() => {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    });
+});
+</script>
+{% endblock %}

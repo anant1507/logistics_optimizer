@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="manage-data">
+    <h2>Data Management</h2>
+    <p class="subtitle">Owner/Manager Panel - Add/Remove Locations and Resources</p>
+
+    <div class="management-sections">
+        <!-- Add New Location -->
+        <div class="management-section">
+            <h3>Add New Location</h3>
+            <form id="addLocationForm">
+                <div class="form-group">
+                    <label>Type:</label>
+                    <select id="locationType" required>
+                        <option value="port">Port</option>
+                        <option value="plant">Plant</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Name:</label>
+                    <input type="text" id="locationName" required>
+                </div>
+                <div class="form-group">
+                    <label>Capacity:</label>
+                    <input type="number" id="locationCapacity" required min="1">
+                </div>
+                <div class="form-group">
+                    <label>Location:</label>
+                    <input type="text" id="locationAddress">
+                </div>
+                <button type="button" onclick="addLocation()">Add Location</button>
+            </form>
+        </div>
+
+        <!-- Current Ports -->
+        <div class="management-section">
+            <h3>Current Ports</h3>
+            <div class="data-list">
+                {% for port in ports %}
+                <div class="data-item">
+                    <span>{{ port.name }} (Capacity: {{ port.capacity }}, Stock: {{ port.current_stock }})</span>
+                    <button class="btn-danger" onclick="deleteLocation('port', {{ port.id }})">Delete</button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Current Plants -->
+        <div class="management-section">
+            <h3>Current Plants</h3>
+            <div class="data-list">
+                {% for plant in plants %}
+                <div class="data-item">
+                    <span>{{ plant.name }} (Capacity: {{ plant.capacity }}, Stock: {{ plant.current_stock }})</span>
+                    <button class="btn-danger" onclick="deleteLocation('plant', {{ plant.id }})">Delete</button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- System Information -->
+        <div class="management-section">
+            <h3>System Overview</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h4>Total Ports</h4>
+                    <p class="stat-number">{{ ports|length }}</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Total Plants</h4>
+                    <p class="stat-number">{{ plants|length }}</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Active Vessels</h4>
+                    <p class="stat-number">{{ vessels|selectattr('status', 'equalto', 'available')|list|length }}</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Active Rakes</h4>
+                    <p class="stat-number">{{ rakes|selectattr('status', 'equalto', 'available')|list|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function addLocation() {
+    const type = document.getElementById('locationType').value;
+    const name = document.getElementById('locationName').value;
+    const capacity = document.getElementById('locationCapacity').value;
+    const location = document.getElementById('locationAddress').value;
+
+    fetch('/add_location', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            type: type,
+            name: name,
+            capacity: capacity,
+            location: location
+        })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            alert(result.message);
+            location.reload();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to add location');
+    });
+}
+
+function deleteLocation(type, id) {
+    if (!confirm(`Are you sure you want to delete this ${type}?`)) {
+        return;
+    }
+
+    fetch('/delete_location', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            type: type,
+            id: id
+        })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            alert(result.message);
+            location.reload();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to delete location');
+    });
+}
+</script>
+{% endblock %}

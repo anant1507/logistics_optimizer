@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="schedules">
+    <h2>Schedules</h2>
+    
+    <div class="actions">
+        <a href="{{ url_for('create_schedule') }}" class="btn">Create New Schedule</a>
+        <a href="{{ url_for('export_data', data_type='schedules') }}" class="btn">Export Schedules</a>
+        <button onclick="predictDelays()" class="btn">Predict Delays</button>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Supplier</th>
+                <th>Port</th>
+                <th>Plant</th>
+                <th>Quantity</th>
+                <th>Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for schedule in schedules %}
+            <tr>
+                <td>{{ schedule.id }}</td>
+                <td>{{ schedule.type }}</td>
+                <td>Supplier {{ schedule.supplier_id }}</td>
+                <td>Port {{ schedule.port_id }}</td>
+                <td>Plant {{ schedule.plant_id }}</td>
+                <td>{{ schedule.quantity }}</td>
+                <td>{{ schedule.scheduled_date }}</td>
+                <td class="status-{{ schedule.status }}">{{ schedule.status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+function predictDelays() {
+    fetch('/predict_delays')
+    .then(response => response.json())
+    .then(data => {
+        if (data.delayed_schedules.length > 0) {
+            let message = 'Potential delays predicted:\n\n';
+            data.delayed_schedules.forEach(delay => {
+                message += `Schedule #${delay.schedule_id}: ${delay.reason} (Estimated delay: ${delay.estimated_delay_days} days)\n`;
+            });
+            alert(message);
+        } else {
+            alert('No delays predicted at this time.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+</script>
+{% endblock %}

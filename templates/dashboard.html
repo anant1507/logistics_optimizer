@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard">
+    <h2>Dashboard</h2>
+    <div class="welcome">
+        <p>Welcome, {{ user }} ({{ role }})</p>
+    </div>
+    
+    <div class="dashboard-cards">
+        <div class="card">
+            <h3>Schedules</h3>
+            <p>Total: {{ schedules|length }}</p>
+            <a href="{{ url_for('schedules_page') }}">View All</a>
+        </div>
+        
+        <div class="card">
+            <h3>Ports</h3>
+            <p>Total: {{ ports|length }}</p>
+        </div>
+        
+        <div class="card">
+            <h3>Plants</h3>
+            <p>Total: {{ plants|length }}</p>
+        </div>
+        
+        <div class="card">
+            <h3>Optimization</h3>
+            <button onclick="optimizeSchedules()">Run Optimization</button>
+        </div>
+    </div>
+    
+    <div class="recent-activities">
+        <h3>Recent Activities</h3>
+        <ul>
+            {% if schedules %}
+                {% for schedule in schedules[-5:] %}
+                <li>Schedule #{{ schedule.id }} - {{ schedule.type }} - {{ schedule.status }}</li>
+                {% endfor %}
+            {% else %}
+                <li>No schedules available</li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+
+<script>
+function optimizeSchedules() {
+    fetch('/optimize', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({type: 'all'})
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message + '\nEstimated Savings: $' + data.estimated_savings);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - AI-Enabled Logistics Optimizer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <h1>AI-Enabled Logistics Optimizer</h1>
+        
+        <div class="auth-tabs">
+            <button class="tab-button active" onclick="showTab('login')">Login</button>
+            <button class="tab-button" onclick="showTab('signup')">Sign Up</button>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" method="POST" class="auth-form active">
+            <h2>Login to Your Account</h2>
+            {% if error %}
+            <div class="error">{{ error }}</div>
+            {% endif %}
+            
+            <div class="form-group">
+                <label for="role">I am a:</label>
+                <select id="role" name="role" required>
+                    <option value="">Select your role</option>
+                    <option value="owner">Owner/Administrator</option>
+                    <option value="manager">Manager</option>
+                    <option value="user">Regular User</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <button type="submit">Login</button>
+        </form>
+
+        <!-- Signup Form -->
+        <form id="signupForm" class="auth-form" onsubmit="event.preventDefault(); signup();">
+            <h2>Create New Account</h2>
+            <div id="signupMessage" class="message"></div>
+            
+            <div class="form-group">
+                <label for="signupRole">I want to register as:</label>
+                <select id="signupRole" name="role" required>
+                    <option value="user">Regular User (View Only)</option>
+                    <option value="manager">Manager (Edit Access)</option>
+                    <option value="owner">Owner (Full Access)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="signupName">Full Name:</label>
+                <input type="text" id="signupName" name="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="signupEmail">Email:</label>
+                <input type="email" id="signupEmail" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="signupPassword">Password:</label>
+                <input type="password" id="signupPassword" name="password" required minlength="6">
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password:</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required minlength="6">
+            </div>
+            
+            <button type="submit">Create Account</button>
+        </form>
+
+        <div class="demo-accounts">
+            <h3>Demo Accounts (Select role first):</h3>
+            <p data-role="owner" data-email="owner@example.com" data-password="owner123">
+                <strong>Owner:</strong> owner@example.com / owner123
+            </p>
+            <p data-role="manager" data-email="manager@example.com" data-password="manager123">
+                <strong>Manager:</strong> manager@example.com / manager123
+            </p>
+            <p data-role="admin" data-email="admin@example.com" data-password="admin123">
+                <strong>Admin:</strong> admin@example.com / admin123
+            </p>
+            <p><strong>Regular User:</strong> Sign up to create a regular user account</p>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Update tabs
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update forms
+            document.querySelectorAll('.auth-form').forEach(form => {
+                form.classList.remove('active');
+            });
+            document.getElementById(tabName + 'Form').classList.add('active');
+            
+            // Clear messages when switching tabs
+            document.getElementById('signupMessage').innerHTML = '';
+        }
+
+        function signup() {
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const role = document.getElementById('signupRole').value;
+            const messageDiv = document.getElementById('signupMessage');
+
+            // Basic validation
+            if (!name || !email || !password || !confirmPassword || !role) {
+                messageDiv.innerHTML = '<div class="error">All fields are required</div>';
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                messageDiv.innerHTML = '<div class="error">Passwords do not match</div>';
+                return;
+            }
+
+            if (password.length < 6) {
+                messageDiv.innerHTML = '<div class="error">Password must be at least 6 characters</div>';
+                return;
+            }
+
+            // Show loading state
+            const submitBtn = document.querySelector('#signupForm button');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Creating Account...';
+            submitBtn.disabled = true;
+
+            // Send signup request
+            fetch('/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: name,
+                    email: email,
+                    password: password,
+                    role: role
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(result => {
+                if (result.success) {
+                    messageDiv.innerHTML = '<div class="success">' + result.message + '</div>';
+                    document.getElementById('signupForm').reset();
+                    setTimeout(() => {
+                        showTab('login');
+                        document.getElementById('email').value = email;
+                        document.getElementById('role').value = role;
+                    }, 2000);
+                } else {
+                    messageDiv.innerHTML = '<div class="error">' + result.message + '</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                messageDiv.innerHTML = '<div class="error">Registration failed. Please try again.</div>';
+            })
+            .finally(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            });
+        }
+
+        // Demo account click handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            const demoAccounts = document.querySelector('.demo-accounts');
+            demoAccounts.addEventListener('click', function(e) {
+                if (e.target.tagName === 'P' && e.target.dataset.role) {
+                    const roleSelect = document.getElementById('role');
+                    roleSelect.value = e.target.dataset.role;
+                    document.getElementById('email').value = e.target.dataset.email;
+                    document.getElementById('password').value = e.target.dataset.password;
+                }
+            });
+        });
+
+        // Enter key support
+        document.getElementById('signupForm').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                signup();
+            }
+        });
+    </script>
+</body>
+</html>

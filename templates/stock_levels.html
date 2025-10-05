@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="stock-levels">
+    <h2>Stock Levels</h2>
+    
+    <div class="actions">
+        <a href="{{ url_for('export_data', data_type='stock_levels') }}" class="btn">Export Stock Levels</a>
+    </div>
+    
+    <h3>Ports</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Port</th>
+                <th>Capacity</th>
+                <th>Current Stock</th>
+                <th>Utilization</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for port in ports %}
+            <tr>
+                <td>{{ port.name }}</td>
+                <td>{{ port.capacity }}</td>
+                <td>{{ port.current_stock }}</td>
+                <td>{{ "%.2f"|format((port.current_stock / port.capacity) * 100) }}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <h3>Plants</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Plant</th>
+                <th>Capacity</th>
+                <th>Current Stock</th>
+                <th>Utilization</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for plant in plants %}
+            <tr>
+                <td>{{ plant.name }}</td>
+                <td>{{ plant.capacity }}</td>
+                <td>{{ plant.current_stock }}</td>
+                <td>{{ "%.2f"|format((plant.current_stock / plant.capacity) * 100) }}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Stock Level History</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Location</th>
+                <th>Stock Level</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in stock_levels %}
+            <tr>
+                <td>{{ stock.id }}</td>
+                <td>
+                    {% if stock.port_id %}
+                    Port {{ stock.port_id }}
+                    {% elif stock.plant_id %}
+                    Plant {{ stock.plant_id }}
+                    {% endif %}
+                </td>
+                <td>{{ stock.stock_level }}</td>
+                <td>{{ stock.timestamp }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
